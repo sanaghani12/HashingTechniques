@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/hp/CLionProjects/HASHTABLEPROJECT
+# Install script for directory: D:/HASHTABLEPROJECT/HashingTechniques
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/hp/CLionProjects/HASHTABLEPROJECT/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/HASHTABLEPROJECT/HashingTechniques/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
