@@ -17,6 +17,8 @@ private:
     Entry keys;
     Entry payloads;
     int size;
+    int stepSize; // Step size for Horizontal Linear Probing
+
 
 public:
     LinearProbingHashing(int size) : size(size) {
@@ -52,9 +54,50 @@ public:
     }
 
 
-    void VectorProbing() override {
-        // Implementation of VectorProbing
-        // ...
+    int VectorProbing(int key) override {
+        //Hash the key
+        unsigned int foffset = HashFunction(key);
+        __m128i mask0 = _mm_setzero_si128();
+        __m128i tmp;
+        register __m128i slot;
+        register __m128i k;
+
+        while(foffset<size){
+            __m128i slot = _mm_set_epi32(keys.key[foffset + 3], keys.key[foffset + 2], keys.key[foffset + 1], keys.key[foffset]);
+            k = _mm_set_epi32(key,key,key,key);
+
+            //Compare the values in the registers and add to payload
+            //Compare registers
+            tmp = _mm_cmpeq_epi32(k,slot);
+            if(_mm_movemask_epi8(tmp)){
+                //Add to Payload
+                payloads.vectorKeys[foffset] = _mm_sub_epi32( payloads.vectorKeys[foffset],tmp);
+                return 1;
+            }
+            //Check if there are zeros
+            __m128i zeroPos = _mm_cmpeq_epi32(mask0,slot);
+            int resMove = _mm_movemask_epi8(zeroPos);
+            if(resMove){
+
+                // Insert values
+                // Shift the values
+                payloads.vectorKeys[foffset] = _mm_bslli_si128(payloads.vectorKeys[foffset], 4);
+                keys.vectorKeys[foffset] = _mm_bslli_si128(keys.vectorKeys[foffset], 4);
+
+                // Place the key in the first position
+                int* valkey = (int*)&keys.vectorKeys[foffset];
+                int* val = (int*)&payloads.vectorKeys[foffset];
+                val[0] = 1;
+                valkey[0] = key;
+//                SIMDProbeEnd = clock();
+//                SIMDTime = SIMDTime + ((long double)SIMDProbeEnd - (long double)SIMDProbeBegin);
+                return 2;
+            }
+
+            foffset = (foffset++)%size;
+
+        }
+        return -1;
     }
 
     void VerticalProbing() override {
