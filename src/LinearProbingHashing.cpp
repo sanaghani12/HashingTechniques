@@ -107,7 +107,11 @@ public:
 
     void Evaluation() override {
         // Implementation of Evaluation
-        // ...
+        int data[] = {1, 1, 1, 1, 1}; // Example data array, you can modify as needed
+
+        for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
+            ScalarProbingInsert(data[i]);
+        }
     }
 
 private:
