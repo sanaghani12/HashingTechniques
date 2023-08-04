@@ -43,6 +43,7 @@ public:
             {
               payloads.key[index]++;
               std::cout << "Key " << key << " already exists." << std::endl;
+                std::cout << " payload" <<  payloads.key[index] << std::endl;
               return;
             }
             else {
