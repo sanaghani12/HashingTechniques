@@ -6,6 +6,9 @@
 #include <vector>
 #include <emmintrin.h>
 #include <smmintrin.h>
+#include <cstdlib>
+#include <algorithm>
+#include <functional>
 
 class LinearProbingHashing : public AbstractHashTable {
 private:
@@ -25,10 +28,17 @@ public:
         keys.key = new int[size];
         payloads.vectorKeys = new __m128i[size/4]; //or new int[size] both keys and payloads should be of same size. Payloads is for keeping track of aggregation value in our case the count
     }
-
+    void Clear() override{
+        for (int i = 0; i < size; i++) {
+            keys.key[i] = 0;
+            payloads.key[i] = 0;
+        }
+    }
     void ScalarProbingInsert(int key) override {
         int index = HashFunction(key);
+        int initialIndex = index; // Store the initial index
 
+//        std::cout <<"index: "<<index <<"\n";
         for(int i=0; i<size; i++)
         {
 //            std::cout << "hello2 " << keys.key[index];
@@ -48,16 +58,18 @@ public:
             }
             else {
                 index = (index + 1) % size;
-//                std::cout << "Key " << key << " hashed at index " << index << std::endl;
+                std::cout << "Key " << key << " hashed at index " << index << std::endl;
+                if (index == initialIndex) {
+                    std::cout << "Table is full, cannot insert key " << key << std::endl;
+                    return;
+                }
             }
 
         }
     }
-
-
-    int VectorProbing(int key) override {
+    int HorizontalVectorProbing(int key) override { //Vector probing is horizontal probing
         //Hash the key
-        unsigned int foffset = HashFunction(key);
+        unsigned int foffset = HashFunction(key)/4;
         __m128i mask0 = _mm_setzero_si128();
         __m128i tmp;
         register __m128i slot;
@@ -100,26 +112,86 @@ public:
         }
         return -1;
     }
+    int HopScotchScalarProbe(unsigned int key, int H) { // Scalar hopscotch probing
 
+        unsigned int foffset = HashFunction(key);
+        unsigned int i;
+        //check if the key is present within its neighborhood
+        for (i = foffset; i < size; i++) {
+            int *valkey = (int*)&keys.key[i];
+            int *val = (int*)&payloads.key[i];
+
+            if (i < (foffset + H)) {
+                for (int j = 0; j < 4; j++) {
+                    if (valkey[j] == key) {
+                        val[j] += 1;
+                        std::cout << "Key " << key << " found at index " << i << ", slot " << j << " with value " << val[j] << std::endl;
+                        return 1;
+                    } else if (valkey[j] == 0) {
+                        val[j] = 1;
+                        valkey[j] = key;
+                        std::cout << "Key " << key << " inserted at index " << i << ", slot " << j << " with value " << val[j] << std::endl;
+                        return 1;
+                    }
+                }
+            }
+            if ((valkey[0] == 0)) { // to send the exact bucket and slot of the empty location to the insert function
+                std::cout << "Key " << key << " can be inserted at index " << i << ", slot 0" << std::endl;
+                return i * 4;
+            }
+            if ((valkey[1] == 0)) {
+                std::cout << "Key " << key << " can be inserted at index " << i << ", slot 1" << std::endl;
+                return (i * 4) + 1;
+            }
+            if ((valkey[2] == 0)) {
+                std::cout << "Key " << key << " can be inserted at index " << i << ", slot 2" << std::endl;
+                return (i * 4) + 2;
+            }
+            if ((valkey[3] == 0)) {
+                std::cout << "Key " << key << " can be inserted at index " << i << ", slot 3" << std::endl;
+                return (i * 4) + 3;
+            }
+        }
+        std::cout << "Key " << key << " could not be inserted." << std::endl;
+        return 0;
+    }
     void VerticalProbing() override {
         // Implementation of VerticalProbing
         // ...
     }
 
-    void Evaluation() override {
+    void Evaluation(int n) override {
         // Implementation of Evaluation
-        int data[] = {1, 1, 1, 1, 1}; // Example data array, you can modify as needed
+//        int data[] = {1, 1, 1, 1, 1}; // Example data array, you can modify as needed
+        int *data= new int[n];     // Array to store the generated values
 
-        for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
-            ScalarProbingInsert(data[i]);
+        // Generate n random values and store them in the data array
+        std::generate_n(data, n, []() {
+            // Generate a random value and return it
+            int random = rand();
+            //std::cout<<random << " \n";
+
+            return random; // This generates a random integer, you can adjust as needed
+        });
+
+        for (int i = 0; i < n; i++) {
+//            ScalarProbingInsert(data[i]);
+//            HorizontalVectorProbing(data[i]);
+            HopScotchScalarProbe(data[i], 4);
         }
     }
 
 private:
-    int HashFunction(int key) {
+    unsigned int HashFunction(int key) {
         // Basic modulo hashing
-        return 1300000077*key % size;
-        //return ((unsigned long)((unsigned int)1300000077*key)* size)>>32;
+//        std::cout<<"size in hashfunction: "<<size <<std::endl;
+       return (unsigned int)1300000077* key % size;
+//        return ((unsigned long)((unsigned int)1300000077*key)* size)>>32;
+        std::hash<int> hasher;
+        return hasher(key) % size;
     }
+//    unsigned int hash2(int key){
+//        return 4*((13*key)%size);
+//    }
 };
 
