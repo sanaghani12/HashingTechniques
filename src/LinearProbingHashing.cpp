@@ -155,6 +155,72 @@ public:
         std::cout << "Key " << key << " could not be inserted." << std::endl;
         return 0;
     }
+
+    int HopScotchHorizontalProbe(unsigned int key, int H) { //SIMDProbe
+        unsigned int foffset = HashFunction(key);
+
+        __m128i mask0 = _mm_setzero_si128();
+        __m128i tmp;
+        __m128i slot;
+        __m128i k;
+
+        for (int i = foffset; i < size; i++) {
+            slot = _mm_set_epi32(keys.key[i + 3], keys.key[i + 2], keys.key[i + 1], keys.key[i]);
+
+            if (i < (foffset + H)) {
+                k = _mm_set_epi32(key, key, key, key);
+                tmp = _mm_cmpeq_epi32(k, slot);
+
+                if (_mm_movemask_epi8(tmp)) {
+                    payloads.vectorKeys[i] = _mm_sub_epi32(payloads.vectorKeys[i], tmp);
+                    std::cout << "Key " << key << " found at index " << i << ", slot " << (i - foffset) << " with value " << payloads.vectorKeys[i][0] << std::endl;
+                    return 1;
+                }
+
+                __m128i zeroPos = _mm_cmpeq_epi32(mask0, slot);
+                int resMove = _mm_movemask_epi8(zeroPos);
+
+                if (resMove) {
+                    payloads.vectorKeys[i] = _mm_bslli_si128(payloads.vectorKeys[i], 4);
+                    keys.vectorKeys[i] = _mm_bslli_si128(keys.vectorKeys[i], 4);
+
+                    int* valkey = (int*)&keys.vectorKeys[i];
+                    int* val = (int*)&payloads.vectorKeys[i];
+                    val[0] = 1;
+                    valkey[0] = key;
+
+                    std::cout << "Key " << key << " inserted at index " << i << ", slot " << (i - foffset) << " with value " << payloads.vectorKeys[i][0] << std::endl;
+                    return 1;
+                }
+            } else {
+                __m128i zeroPos = _mm_cmpeq_epi32(mask0, slot);
+                int* pt = (int*)&zeroPos;
+                int resMove = _mm_movemask_epi8(zeroPos);
+
+                if (resMove) {
+                    if (pt[0] == -1) {
+                        std::cout << "Key " << key << " can be inserted at index " << i << ", slot 0" << std::endl;
+                        return i * 4;
+                    }
+                    if (pt[1] == -1) {
+                        std::cout << "Key " << key << " can be inserted at index " << i << ", slot 1" << std::endl;
+                        return (i * 4) + 1;
+                    }
+                    if (pt[2] == -1) {
+                        std::cout << "Key " << key << " can be inserted at index " << i << ", slot 2" << std::endl;
+                        return (i * 4) + 2;
+                    }
+                    if (pt[3] == -1) {
+                        std::cout << "Key " << key << " can be inserted at index " << i << ", slot 3" << std::endl;
+                        return (i * 4) + 3;
+                    }
+                }
+            }
+        }
+
+        std::cout << "Key " << key << " could not be inserted." << std::endl;
+        return 0;
+    }
     void VerticalProbing() override {
         // Implementation of VerticalProbing
         // ...
@@ -177,7 +243,8 @@ public:
         for (int i = 0; i < n; i++) {
 //            ScalarProbingInsert(data[i]);
 //            HorizontalVectorProbing(data[i]);
-            HopScotchScalarProbe(data[i], 4);
+//            HopScotchScalarProbe(data[i], 4);
+            HopScotchHorizontalProbe(data[i], 4);
         }
     }
 

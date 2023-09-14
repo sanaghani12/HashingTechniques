@@ -10,6 +10,7 @@ public:
     virtual int HorizontalVectorProbing(int key) = 0;
     virtual void VerticalProbing() = 0;
     virtual int HopScotchScalarProbe(unsigned int key, int H) = 0;
+    virtual int HopScotchHorizontalProbe(unsigned int key, int H) = 0;
     virtual void Evaluation(int size) = 0;
     virtual void Clear() = 0;
 };
