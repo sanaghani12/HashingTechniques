@@ -128,6 +128,30 @@ HASHTABLEPROJECT/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\HASHTABLEPROJECT.dir\build.make CMakeFiles/HASHTABLEPROJECT.dir/build
 .PHONY : HASHTABLEPROJECT/fast
 
+src/HopscotchHashing.obj: src/HopscotchHashing.cpp.obj
+.PHONY : src/HopscotchHashing.obj
+
+# target to build an object file
+src/HopscotchHashing.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\HASHTABLEPROJECT.dir\build.make CMakeFiles/HASHTABLEPROJECT.dir/src/HopscotchHashing.cpp.obj
+.PHONY : src/HopscotchHashing.cpp.obj
+
+src/HopscotchHashing.i: src/HopscotchHashing.cpp.i
+.PHONY : src/HopscotchHashing.i
+
+# target to preprocess a source file
+src/HopscotchHashing.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\HASHTABLEPROJECT.dir\build.make CMakeFiles/HASHTABLEPROJECT.dir/src/HopscotchHashing.cpp.i
+.PHONY : src/HopscotchHashing.cpp.i
+
+src/HopscotchHashing.s: src/HopscotchHashing.cpp.s
+.PHONY : src/HopscotchHashing.s
+
+# target to generate assembly for a file
+src/HopscotchHashing.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\HASHTABLEPROJECT.dir\build.make CMakeFiles/HASHTABLEPROJECT.dir/src/HopscotchHashing.cpp.s
+.PHONY : src/HopscotchHashing.cpp.s
+
 src/LinearProbingHashing.obj: src/LinearProbingHashing.cpp.obj
 .PHONY : src/LinearProbingHashing.obj
 
@@ -185,6 +209,9 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... HASHTABLEPROJECT
+	@echo ... src/HopscotchHashing.obj
+	@echo ... src/HopscotchHashing.i
+	@echo ... src/HopscotchHashing.s
 	@echo ... src/LinearProbingHashing.obj
 	@echo ... src/LinearProbingHashing.i
 	@echo ... src/LinearProbingHashing.s
