@@ -36,5 +36,5 @@ The repository includes the code to analyze the performance of Linear Probing an
 
 ## Contributing
 
-If you find any issues or have suggestions for improvements, feel free to contribute! Please check the [contribution guidelines](CONTRIBUTING.md) before submitting a pull request.
+If you find any issues or have suggestions for improvements, feel free to contribute!
 
